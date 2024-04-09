@@ -13,7 +13,7 @@ func Migration() {
 		&model2.Product{},
 		&model2.Carousel{},
 		&model2.Category{},
-		&model2.Favorite{},
+		&model2.Favourite{},
 		&model2.ProductImg{},
 		&model2.Order{},
 		&model2.Cart{},

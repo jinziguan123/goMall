@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-05 16:39:07
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-05 19:30:54
+ * @LastEditTime: 2024-04-07 15:21:44
  * @FilePath: /goMall/backend/config/config.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,7 +16,7 @@ import (
 
 type Env struct {
 	AppMode     string `mapstructure:"APP_MODE"`
-	HttpPOrt    string `mapstructure:"HTTP_PORT"`
+	HttpPort    string `mapstructure:"HTTP_PORT"`
 	UploadModel string `mapstructure:"UPLOAD_MODEL"`
 
 	MySQLHost     string `mapstructure:"MYSQL_HOST"`
