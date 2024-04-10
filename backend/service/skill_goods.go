@@ -1,11 +1,3 @@
-/*
- * @Author: Ziguan Jin 18917950960@163.com
- * @Date: 2024-04-08 14:07:29
- * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-09 00:10:35
- * @FilePath: /goMall/backend/service/skill_goods.go
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 package service
 
 import (
@@ -43,7 +35,7 @@ type SkillGoodsService struct {
 	Key          string `json:"key" form:"key"`
 }
 
-func (service *SkillGoodsImport) Import(c context.Context, file multipart.File) serializer.Response {
+func (service *SkillGoodsImport) Import(ctx context.Context, file multipart.File) serializer.Response {
 	xlFile, err := xlsx.OpenReader(file)
 	if err != nil {
 		logging.Info(err)
@@ -51,7 +43,7 @@ func (service *SkillGoodsImport) Import(c context.Context, file multipart.File) 
 	code := e.SUCCESS
 	rows := xlFile.GetRows("Sheet1")
 	length := len(rows[1:])
-	skillGoods := make([]*model.SkillGoods, length, length)
+	skillGoods := make([]*model.SkillGoods, length)
 	for index, colCell := range rows {
 		if index == 0 {
 			continue
@@ -69,7 +61,7 @@ func (service *SkillGoodsImport) Import(c context.Context, file multipart.File) 
 		}
 		skillGoods[index-1] = skillGood
 	}
-	err = dao.NewSkillGoodsDao(c).CreateByList(skillGoods)
+	err = dao.NewSkillGoodsDao(ctx).CreateByList(skillGoods)
 	if err != nil {
 		code = e.ERROR
 		return serializer.Response{
@@ -84,85 +76,16 @@ func (service *SkillGoodsImport) Import(c context.Context, file multipart.File) 
 	}
 }
 
-// 初始化秒杀商品， 将MySQL信息存入Redis
-func (service *SkillGoodsService) InitSkillGoods(c context.Context, uId uint) error {
-	skillGoods, _ := dao.NewSkillGoodsDao(c).ListSkillGoods()
+// 直接放到这里，初始化秒杀商品信息，将mysql的信息存入redis中
+func (service *SkillGoodsService) InitSkillGoods(ctx context.Context) error {
+	skillGoods, _ := dao.NewSkillGoodsDao(ctx).ListSkillGoods()
 	r := cache.RedisClient
-
-	// 存入Redis
+	// 加载到redis
 	for i := range skillGoods {
 		fmt.Println(*skillGoods[i])
 		r.HSet("SK"+strconv.Itoa(int(skillGoods[i].Id)), "num", skillGoods[i].Num)
 		r.HSet("SK"+strconv.Itoa(int(skillGoods[i].Id)), "money", skillGoods[i].Money)
 	}
-	return nil
-}
-
-func getUuid(gid string) string {
-	codeLen := 8
-	// 1.定义原始字符串
-	rawStr := "hklajhdsfkhkdjhfak02304_"
-	// 2.定义一个buf，将buf交给bytes往里面写数据
-	buf := make([]byte, 0, codeLen)
-	b := bytes.NewBuffer(buf)
-	// 随机从中获取
-	rand.Seed(time.Now().UnixNano())
-	for rawStrLen := len(rawStr); codeLen > 0; codeLen-- {
-		randNum := rand.Intn(rawStrLen)
-		b.WriteByte(rawStr[randNum])
-	}
-	return b.String() + gid
-}
-
-// 加锁
-func RedissonSecKillGoods(sk *model.SkillGood2MQ) error {
-	p := strconv.Itoa(int(sk.ProductId))
-	uuid := getUuid(p)
-	_, err := cache.RedisClient.Del(p).Result()
-	lockSuccess, err := cache.RedisClient.SetNX(p, uuid, time.Second*3).Result()
-	if err != nil || !lockSuccess {
-		fmt.Println("get lock fail", err)
-		return errors.New("get lock fail")
-	} else {
-		fmt.Println("get lock success")
-	}
-	_ = SendSecKillGoodsToMQ(sk)
-	value, _ := cache.RedisClient.Get(p).Result()
-	if value == uuid {
-		_, err := cache.RedisClient.Del(p).Result()
-		if err != nil {
-			fmt.Println("unlock fail")
-		} else {
-			fmt.Println("unlock success")
-		}
-	}
-	return nil
-}
-
-// 传送到MQ
-func SendSecKillGoodsToMQ(sk *model.SkillGood2MQ) error {
-	ch, err := mq.RabbitMQ.Channel()
-	if err != nil {
-		err = errors.New("rebbitMQ err:" + err.Error())
-		return err
-	}
-	q, err := ch.QueueDeclare("skill_goods", true, false, false, false, nil)
-	if err != nil {
-		err = errors.New("rebbitMQ err:" + err.Error())
-		return err
-	}
-
-	body, _ := json.Marshal(sk)
-	err = ch.Publish("", q.Name, false, false, amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
-		ContentType:  "application/json",
-		Body:         body,
-	})
-	if err != nil {
-		err = errors.New("rebbitMQ err:" + err.Error())
-		return err
-	}
-	log.Printf("Sent %s", body)
 	return nil
 }
 
@@ -183,3 +106,73 @@ func (service *SkillGoodsService) SkillGoods(ctx context.Context, uId uint) seri
 	}
 	return serializer.Response{}
 }
+
+// 加锁
+func RedissonSecKillGoods(sk *model.SkillGood2MQ) error {
+	p := strconv.Itoa(int(sk.ProductId))
+	uuid := getUuid(p)
+	_, err := cache.RedisClient.Del(p).Result()
+	lockSuccess, err := cache.RedisClient.SetNX(p, uuid, time.Second*3).Result()
+	if err != nil || !lockSuccess {
+		fmt.Println("get lock fail", err)
+		return errors.New("get lock fail")
+	} else {
+		fmt.Println("get lock success")
+	}
+	_ = SendSecKillGoodsToMQ(sk)
+	value, _ := cache.RedisClient.Get(p).Result()
+	if value == uuid { // compare value,if equal then del
+		_, err := cache.RedisClient.Del(p).Result()
+		if err != nil {
+			fmt.Println("unlock fail")
+			return nil
+		} else {
+			fmt.Println("unlock success")
+		}
+	}
+	return nil
+}
+
+// 传送到MQ
+func SendSecKillGoodsToMQ(sk *model.SkillGood2MQ) error {
+	ch, err := mq.RabbitMQ.Channel()
+	if err != nil {
+		err = errors.New("rabbitMQ err:" + err.Error())
+		return err
+	}
+	q, err := ch.QueueDeclare("skill_goods", true, false, false, false, nil)
+	if err != nil {
+		err = errors.New("rabbitMQ err:" + err.Error())
+		return err
+	}
+	body, _ := json.Marshal(sk)
+	err = ch.Publish("", q.Name, false, false, amqp.Publishing{
+		DeliveryMode: amqp.Persistent,
+		ContentType:  "application/json",
+		Body:         body,
+	})
+	if err != nil {
+		err = errors.New("rabbitMQ err:" + err.Error())
+		return err
+	}
+	log.Printf("Sent %s", body)
+	return nil
+}
+
+func getUuid(gid string) string {
+	codeLen := 8
+	// 1. 定义原始字符串
+	rawStr := "jkwangagDGFHGSERKILMJHSNOPQR546413890_"
+	// 2. 定义一个buf，并且将buf交给bytes往buf中写数据
+	buf := make([]byte, 0, codeLen)
+	b := bytes.NewBuffer(buf)
+	// 随机从中获取
+	rand.Seed(time.Now().UnixNano())
+	for rawStrLen := len(rawStr); codeLen > 0; codeLen-- {
+		randNum := rand.Intn(rawStrLen)
+		b.WriteByte(rawStr[randNum])
+	}
+	return b.String() + gid
+}
+
+// 取消订单的操作,redis的商品回退

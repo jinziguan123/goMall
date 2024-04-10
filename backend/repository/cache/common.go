@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-05 16:36:26
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-05 19:35:50
+ * @LastEditTime: 2024-04-10 00:32:37
  * @FilePath: /goMall/backend/repository/cache/common.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -10,31 +10,32 @@ package cache
 
 import (
 	"goMall/backend/config"
-	"log"
 	"strconv"
 
 	"github.com/go-redis/redis"
+	logging "github.com/sirupsen/logrus"
 )
 
-// Redis单例
+// RedisClient Redis缓存客户端单例
 var RedisClient *redis.Client
 
-// 初始化链接，防止循环导包
+// InitCache 在中间件中初始化redis链接  防止循环导包，所以放在这里
 func InitCache() {
 	Redis()
 }
 
+// Redis 在中间件中初始化redis链接
 func Redis() {
-	env := config.NewEnv()
-	db, _ := strconv.ParseUint(env.RedisDbName, 10, 64)
+	db, _ := strconv.ParseUint(config.RedisDbName, 10, 64)
 	client := redis.NewClient(&redis.Options{
-		Addr:     env.RedisAddr,
-		Password: env.RedisPw,
+		Addr:     config.RedisAddr,
+		Password: config.RedisPw,
 		DB:       int(db),
 	})
 	_, err := client.Ping().Result()
 	if err != nil {
-		log.Fatal("can't connect to Redis", err)
+		logging.Info(err)
+		panic(err)
 	}
 	RedisClient = client
 }

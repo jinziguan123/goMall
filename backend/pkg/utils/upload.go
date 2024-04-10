@@ -16,8 +16,7 @@ import (
 // UploadProductToLocalStatic 上传到本地文件中
 func UploadProductToLocalStatic(file multipart.File, bossId uint, productName string) (filePath string, err error) {
 	bId := strconv.Itoa(int(bossId))
-	env := config.NewEnv()
-	basePath := "." + env.ProductPhotoHost + "boss" + bId + "/"
+	basePath := "." + config.ProductPhotoPath + "boss" + bId + "/"
 	if !DirExistOrNot(basePath) {
 		CreateDir(basePath)
 	}
@@ -35,9 +34,8 @@ func UploadProductToLocalStatic(file multipart.File, bossId uint, productName st
 
 // UploadAvatarToLocalStatic 上传头像
 func UploadAvatarToLocalStatic(file multipart.File, userId uint, userName string) (filePath string, err error) {
-	env := config.NewEnv()
 	bId := strconv.Itoa(int(userId))
-	basePath := "." + env.AvatarPath + "user" + bId + "/"
+	basePath := "." + config.AvatarPath + "user" + bId + "/"
 	if !DirExistOrNot(basePath) {
 		CreateDir(basePath)
 	}
@@ -74,13 +72,11 @@ func CreateDir(dirName string) bool {
 }
 
 // UploadToQiNiu 封装上传图片到七牛云然后返回状态和图片的url，单张
-// 待改
 func UploadToQiNiu(file multipart.File, fileSize int64) (path string, err error) {
-	env := config.NewEnv()
-	var AccessKey = env.AccessKey
-	var SerectKey = env.SecretKey
-	var Bucket = env.Bucket
-	var ImgUrl = env.HuaweiServer
+	var AccessKey = config.AccessKey
+	var SerectKey = config.SerectKey
+	var Bucket = config.Bucket
+	var ImgUrl = config.QiniuServer
 	putPlicy := storage.PutPolicy{
 		Scope: Bucket,
 	}

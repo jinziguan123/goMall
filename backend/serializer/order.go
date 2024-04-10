@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 16:40:23
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-07 16:44:02
+ * @LastEditTime: 2024-04-10 00:35:36
  * @FilePath: /goMall/backend/serializer/order.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,8 +11,10 @@ package serializer
 import (
 	"context"
 	"goMall/backend/config"
-	"goMall/backend/repository/database/dao"
-	"goMall/backend/repository/database/model"
+	"goMall/backend/consts"
+
+	dao2 "goMall/backend/repository/database/dao"
+	model2 "goMall/backend/repository/database/model"
 )
 
 type Order struct {
@@ -33,8 +35,7 @@ type Order struct {
 	DiscountPrice string `json:"discount_price"`
 }
 
-func BuildOrder(item1 *model.Order, item2 *model.Product, item3 *model.Address) Order {
-	env := config.NewEnv()
+func BuildOrder(item1 *model2.Order, item2 *model2.Product, item3 *model2.Address) Order {
 	o := Order{
 		ID:            item1.ID,
 		OrderNum:      item1.OrderNum,
@@ -49,20 +50,20 @@ func BuildOrder(item1 *model.Order, item2 *model.Product, item3 *model.Address) 
 		Address:       item3.Address,
 		Type:          item1.Type,
 		Name:          item2.Name,
-		ImgPath:       env.PhotoHost + env.HttpPort + env.ProductPhotoHost + item2.ImgPath,
+		ImgPath:       config.PhotoHost + config.HttpPort + config.ProductPhotoPath + item2.ImgPath,
 		DiscountPrice: item2.DiscountPrice,
 	}
 
-	// if env.UploadModel == consts.UploadModelOss {
-	// 	o.ImgPath = item2.ImgPath
-	// }
+	if config.UploadModel == consts.UploadModelOss {
+		o.ImgPath = item2.ImgPath
+	}
 
 	return o
 }
 
-func BuildOrders(c context.Context, items []*model.Order) (orders []Order) {
-	productDao := dao.NewProductDao(c)
-	addressDao := dao.NewAddressDao(c)
+func BuildOrders(ctx context.Context, items []*model2.Order) (orders []Order) {
+	productDao := dao2.NewProductDao(ctx)
+	addressDao := dao2.NewAddressDao(ctx)
 
 	for _, item := range items {
 		product, err := productDao.GetProductById(item.ProductID)

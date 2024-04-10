@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 12:10:12
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-07 13:15:58
+ * @LastEditTime: 2024-04-10 00:30:31
  * @FilePath: /goMall/backend/middleware/cors.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,8 +20,8 @@ import (
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method               // 请求方法
-		origin := c.Request.Header.Get("Origin") //请求头部
-		var headerKeys []string
+		origin := c.Request.Header.Get("Origin") // 请求头部
+		var headerKeys []string                  // 声明请求头keys
 		for k := range c.Request.Header {
 			headerKeys = append(headerKeys, k)
 		}
@@ -41,13 +41,13 @@ func Cors() gin.HandlerFunc {
 			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma,FooBar") // 跨域关键设置 让浏览器可以解析
 			c.Header("Access-Control-Max-Age", "172800")                                                                                                                                                           // 缓存请求信息 单位为秒
 			c.Header("Access-Control-Allow-Credentials", "false")                                                                                                                                                  //  跨域请求是否需要带cookie信息 默认设置为true
-			c.Set("content-type", "application/json")
+			c.Set("content-type", "application/json")                                                                                                                                                              // 设置返回格式是json
 		}
-
 		// 放行所有OPTIONS方法
 		if method == "OPTIONS" {
 			c.JSON(http.StatusOK, "Options Request!")
 		}
-		c.Next()
+		// 处理请求
+		c.Next() //  处理请求
 	}
 }

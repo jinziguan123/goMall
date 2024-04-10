@@ -1,11 +1,3 @@
-/*
- * @Author: Ziguan Jin 18917950960@163.com
- * @Date: 2024-04-07 16:23:42
- * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-07 16:39:08
- * @FilePath: /goMall/backend/pkg/utils/encryption.go
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 package utils
 
 import (
@@ -15,12 +7,12 @@ import (
 	"errors"
 )
 
-// AES加密算法
+var Encrypt *Encryption
+
+// AES 加密算法
 type Encryption struct {
 	key string
 }
-
-var Encrypt *Encryption
 
 func init() {
 	Encrypt = NewEncryption()
@@ -46,15 +38,15 @@ func (k *Encryption) AesEncoding(src string) string {
 		return src
 	}
 	// 密码填充
-	NewSrcByte := PadPwd(srcByte, block.BlockSize())
+	NewSrcByte := PadPwd(srcByte, block.BlockSize()) // 由于字节长度不够，所以要进行字节的填充
 	dst := make([]byte, len(NewSrcByte))
 	block.Encrypt(dst, NewSrcByte)
-	// base64编码
+	// base64 编码
 	pwd := base64.StdEncoding.EncodeToString(dst)
 	return pwd
 }
 
-// 去掉填充部分
+// 去掉填充的部分
 func UnPadPwd(dst []byte) ([]byte, error) {
 	if len(dst) <= 0 {
 		return dst, errors.New("长度有误")
@@ -82,13 +74,14 @@ func (k *Encryption) AesDecoding(pwd string) string {
 	}
 	dst := make([]byte, len(pwdByte))
 	block.Decrypt(dst, pwdByte)
-	dst, err = UnPadPwd(dst)
+	dst, err = UnPadPwd(dst) // 填充的要去掉
 	if err != nil {
 		return "0"
 	}
 	return string(dst)
 }
 
+// set方法
 func (k *Encryption) SetKey(key string) {
 	k.key = key
 }

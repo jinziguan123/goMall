@@ -70,11 +70,11 @@ func (service *ProductService) Create(ctx context.Context, uId uint, files []*mu
 	// 以第一张作为封面图
 	tmp, _ := files[0].Open()
 	var path string
-	// if conf.UploadModel == consts.UploadModelLocal {
-	// 	path, err = util.UploadProductToLocalStatic(tmp, uId, service.Name)
-	// } else {
-	// 	path, err = util.UploadToQiNiu(tmp, files[0].Size)
-	// }
+	if config.UploadModel == consts.UploadModelLocal {
+		path, err = utils.UploadProductToLocalStatic(tmp, uId, service.Name)
+	} else {
+		path, err = utils.UploadToQiNiu(tmp, files[0].Size)
+	}
 	if err != nil {
 		code = e.ErrorUploadFile
 		return serializer.Response{
@@ -115,8 +115,7 @@ func (service *ProductService) Create(ctx context.Context, uId uint, files []*mu
 		num := strconv.Itoa(index)
 		productImgDao := dao.NewProductImgDaoByDB(productDao.DB)
 		tmp, _ = file.Open()
-		env := config.NewEnv()
-		if env.UploadModel == consts.UploadModelLocal {
+		if config.UploadModel == consts.UploadModelLocal {
 			path, err = utils.UploadProductToLocalStatic(tmp, uId, service.Name+num)
 		} else {
 			path, err = utils.UploadToQiNiu(tmp, file.Size)

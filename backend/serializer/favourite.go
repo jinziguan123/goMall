@@ -1,20 +1,12 @@
-/*
- * @Author: Ziguan Jin 18917950960@163.com
- * @Date: 2024-04-07 16:17:17
- * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-08 11:08:02
- * @FilePath: /goMall/backend/serializer/favourite.go
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 package serializer
 
 import (
 	"context"
-	"goMall/backend/repository/database/dao"
+	dao2 "goMall/backend/repository/database/dao"
 	"goMall/backend/repository/database/model"
 )
 
-type Favourite struct {
+type Favorite struct {
 	UserID        uint   `json:"user_id"`
 	ProductID     uint   `json:"product_id"`
 	CreatedAt     int64  `json:"create_at"`
@@ -30,39 +22,41 @@ type Favourite struct {
 	OnSale        bool   `json:"on_sale"`
 }
 
-func BuildFavourite(favourite *model.Favourite, product *model.Product, user *model.User) Favourite {
-	return Favourite{
-		UserID:        favourite.UserID,
-		ProductID:     favourite.ProductID,
-		CreatedAt:     favourite.CreatedAt.Unix(),
-		Name:          product.Name,
-		CategoryID:    product.CategoryID,
-		Title:         product.Title,
-		Info:          product.Info,
-		ImgPath:       product.ImgPath,
-		Price:         product.Price,
-		DiscountPrice: product.DiscountPrice,
-		BossID:        user.ID,
-		Num:           product.Num,
-		OnSale:        product.OnSale,
+// 序列化收藏夹
+func BuildFavorite(item1 *model.Favorite, item2 *model.Product, item3 *model.User) Favorite {
+	return Favorite{
+		UserID:        item1.UserID,
+		ProductID:     item1.ProductID,
+		CreatedAt:     item1.CreatedAt.Unix(),
+		Name:          item2.Name,
+		CategoryID:    item2.CategoryID,
+		Title:         item2.Title,
+		Info:          item2.Info,
+		ImgPath:       item2.ImgPath,
+		Price:         item2.Price,
+		DiscountPrice: item2.DiscountPrice,
+		BossID:        item3.ID,
+		Num:           item2.Num,
+		OnSale:        item2.OnSale,
 	}
 }
 
-func BuildFavourites(c context.Context, items []*model.Favourite) (favourites []Favourite) {
-	productDao := dao.NewProductDao(c)
-	userDao := dao.NewUserDao(c)
+// 收藏夹列表
+func BuildFavorites(ctx context.Context, items []*model.Favorite) (favorites []Favorite) {
+	productDao := dao2.NewProductDao(ctx)
+	bossDao := dao2.NewUserDao(ctx)
 
-	for _, item := range items {
-		product, err := productDao.GetProductById(item.ProductID)
+	for _, fav := range items {
+		product, err := productDao.GetProductById(fav.ProductID)
 		if err != nil {
 			continue
 		}
-		user, err := userDao.GetUserById(item.UserID)
+		boss, err := bossDao.GetUserById(fav.UserID)
 		if err != nil {
 			continue
 		}
-		favourite := BuildFavourite(item, product, user)
-		favourites = append(favourites, favourite)
+		favorite := BuildFavorite(fav, product, boss)
+		favorites = append(favorites, favorite)
 	}
-	return favourites
+	return favorites
 }

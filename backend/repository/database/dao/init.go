@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-05 20:08:26
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-05 20:54:39
+ * @LastEditTime: 2024-04-10 00:33:26
  * @FilePath: /goMall/backend/repository/database/dao/init.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -27,9 +27,8 @@ var (
 )
 
 func InitMySQL() {
-	env := config.NewEnv()
-	pathRead := strings.Join([]string{env.MySQLUserName, ":", env.MySQLPassword, "@tcp(", env.MySQLHost, ")/", env.MySQLDbName, "?charset=utf8&parseTime=True&loc=Local"}, "")
-	pathWrite := strings.Join([]string{env.MySQLUserName, ":", env.MySQLPassword, "@tcp(", env.MySQLHost, ")/", env.MySQLDbName, "?charset=utf8&parseTime=True&loc=Local"}, "")
+	pathRead := strings.Join([]string{config.DbUser, ":", config.DbPassWord, "@tcp(", config.DbHost, ":", config.DbPort, ")/", config.DbName, "?charset=utf8&parseTime=true"}, "")
+	pathWrite := strings.Join([]string{config.DbUser, ":", config.DbPassWord, "@tcp(", config.DbHost, ":", config.DbPort, ")/", config.DbName, "?charset=utf8&parseTime=true"}, "")
 
 	var ormLogger logger.Interface
 	if gin.Mode() == "debug" {
@@ -54,18 +53,21 @@ func InitMySQL() {
 		panic(err)
 	}
 	sqlDB, _ := db.DB()
-	sqlDB.SetMaxIdleConns(20)  // 设置连接池
+	sqlDB.SetMaxIdleConns(20)  // 设置连接池，空闲
 	sqlDB.SetMaxOpenConns(100) // 打开
 	sqlDB.SetConnMaxLifetime(time.Second * 30)
-	_ = _db.Use(dbresolver.Register(dbresolver.Config{
-		Sources:  []gorm.Dialector{mysql.Open(pathRead)},
-		Replicas: []gorm.Dialector{mysql.Open(pathWrite), mysql.Open(pathWrite)},
-		Policy:   dbresolver.RandomPolicy{},
-	}))
+	_db = db
+	_ = _db.Use(dbresolver.
+		Register(dbresolver.Config{
+			// `db2` 作为 sources，`db3`、`db4` 作为 replicas
+			Sources:  []gorm.Dialector{mysql.Open(pathRead)},                         // 写操作
+			Replicas: []gorm.Dialector{mysql.Open(pathWrite), mysql.Open(pathWrite)}, // 读操作
+			Policy:   dbresolver.RandomPolicy{},                                      // sources/replicas 负载均衡策略
+		}))
 	Migration()
 }
 
-func NewDBClient(c context.Context) *gorm.DB {
+func NewDBClient(ctx context.Context) *gorm.DB {
 	db := _db
-	return db.WithContext(c)
+	return db.WithContext(ctx)
 }
