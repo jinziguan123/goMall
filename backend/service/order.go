@@ -1,11 +1,3 @@
-/*
- * @Author: Ziguan Jin 18917950960@163.com
- * @Date: 2024-04-08 11:19:02
- * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-08 11:40:28
- * @FilePath: /goMall/backend/service/order.go
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 package service
 
 import (
@@ -38,7 +30,7 @@ type OrderService struct {
 	model.BasePage
 }
 
-func (service *OrderService) Create(c context.Context, id uint) serializer.Response {
+func (service *OrderService) Create(ctx context.Context, id uint) serializer.Response {
 	code := e.SUCCESS
 
 	order := &model.Order{
@@ -49,7 +41,7 @@ func (service *OrderService) Create(c context.Context, id uint) serializer.Respo
 		Money:     float64(service.Money),
 		Type:      1,
 	}
-	addressDao := dao.NewAddressDao(c)
+	addressDao := dao.NewAddressDao(ctx)
 	address, err := addressDao.GetAddressByAid(service.AddressID)
 	if err != nil {
 		logging.Info(err)
@@ -69,7 +61,7 @@ func (service *OrderService) Create(c context.Context, id uint) serializer.Respo
 	orderNum, _ := strconv.ParseUint(number, 10, 64)
 	order.OrderNum = orderNum
 
-	orderDao := dao.NewOrderDao(c)
+	orderDao := dao.NewOrderDao(ctx)
 	err = orderDao.CreateOrder(order)
 	if err != nil {
 		logging.Info(err)
@@ -81,7 +73,7 @@ func (service *OrderService) Create(c context.Context, id uint) serializer.Respo
 		}
 	}
 
-	// 订单号存入Redis， 设置过期时间
+	// 订单号存入Redis中，设置过期时间
 	data := redis.Z{
 		Score:  float64(time.Now().Unix()) + 15*time.Minute.Seconds(),
 		Member: orderNum,

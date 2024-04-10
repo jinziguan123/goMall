@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"goMall/backend/config"
+	"io"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
@@ -21,11 +22,11 @@ func UploadProductToLocalStatic(file multipart.File, bossId uint, productName st
 		CreateDir(basePath)
 	}
 	productPath := basePath + productName + ".jpg"
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		return "", err
 	}
-	err = ioutil.WriteFile(productPath, content, 0666)
+	err = os.WriteFile(productPath, content, 0666)
 	if err != nil {
 		return "", err
 	}

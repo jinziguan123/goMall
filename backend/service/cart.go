@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 18:04:15
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-08 11:04:26
+ * @LastEditTime: 2024-04-10 12:26:49
  * @FilePath: /goMall/backend/service/cart.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -106,10 +106,12 @@ func (service *CartService) Update(c context.Context, cId string) serializer.Res
 }
 
 // 删除购物车
-func (service *CartService) Delete(ctx context.Context) serializer.Response {
+func (service *CartService) Delete(ctx context.Context, cId string) serializer.Response {
 	code := e.SUCCESS
+	cartId, _ := strconv.Atoi(cId)
+
 	cartDao := dao.NewCartDao(ctx)
-	err := cartDao.DeleteCartById(service.Id)
+	err := cartDao.DeleteCartById(uint(cartId))
 	if err != nil {
 		logging.Info(err)
 		code = e.ErrorDatabase

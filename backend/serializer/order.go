@@ -1,20 +1,11 @@
-/*
- * @Author: Ziguan Jin 18917950960@163.com
- * @Date: 2024-04-07 16:40:23
- * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-10 00:35:36
- * @FilePath: /goMall/backend/serializer/order.go
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 package serializer
 
 import (
 	"context"
 	"goMall/backend/config"
 	"goMall/backend/consts"
-
-	dao2 "goMall/backend/repository/database/dao"
-	model2 "goMall/backend/repository/database/model"
+	"goMall/backend/repository/database/dao"
+	"goMall/backend/repository/database/model"
 )
 
 type Order struct {
@@ -35,7 +26,7 @@ type Order struct {
 	DiscountPrice string `json:"discount_price"`
 }
 
-func BuildOrder(item1 *model2.Order, item2 *model2.Product, item3 *model2.Address) Order {
+func BuildOrder(item1 *model.Order, item2 *model.Product, item3 *model.Address) Order {
 	o := Order{
 		ID:            item1.ID,
 		OrderNum:      item1.OrderNum,
@@ -61,9 +52,9 @@ func BuildOrder(item1 *model2.Order, item2 *model2.Product, item3 *model2.Addres
 	return o
 }
 
-func BuildOrders(ctx context.Context, items []*model2.Order) (orders []Order) {
-	productDao := dao2.NewProductDao(ctx)
-	addressDao := dao2.NewAddressDao(ctx)
+func BuildOrders(ctx context.Context, items []*model.Order) (orders []Order) {
+	productDao := dao.NewProductDao(ctx)
+	addressDao := dao.NewAddressDao(ctx)
 
 	for _, item := range items {
 		product, err := productDao.GetProductById(item.ProductID)

@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 16:46:53
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-10 09:15:56
+ * @LastEditTime: 2024-04-10 11:49:19
  * @FilePath: /goMall/backend/api/v1/address.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,7 +20,7 @@ import (
 func CreateAddress(c *gin.Context) {
 	addressService := service.AddressService{}
 	claim, _ := utils.ParseToken(c.GetHeader("Authorization"))
-	if err := c.ShouldBind(&addressService); err != nil {
+	if err := c.ShouldBind(&addressService); err == nil {
 		res := addressService.Create(c.Request.Context(), claim.ID)
 		c.JSON(consts.StatusOK, res)
 	} else {
