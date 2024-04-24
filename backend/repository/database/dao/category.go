@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 11:04:14
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-07 11:04:45
+ * @LastEditTime: 2024-04-13 13:23:05
  * @FilePath: /goMall/backend/repository/database/dao/category.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -25,6 +25,11 @@ func NewCategoryDao(ctx context.Context) *CategoryDao {
 
 func NewCategoryDaoByDB(db *gorm.DB) *CategoryDao {
 	return &CategoryDao{db}
+}
+
+func (dao *CategoryDao) CreateCategory(category *model.Category) (err error) {
+	err = dao.DB.Model(&model.Category{}).Create(&category).Error
+	return
 }
 
 // ListCategory 分类列表

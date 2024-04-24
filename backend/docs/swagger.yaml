@@ -1,0 +1,413 @@
+info:
+  contact: {}
+  description: 后台API接口文档
+  title: goMall电商系统
+  version: "1.0"
+paths:
+  /api/v1/addresses:
+    get:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        schema:
+          type: string
+      - description: 手机号
+        in: body
+        name: phone
+        schema:
+          type: string
+      - description: 地址
+        in: body
+        name: address
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 展示用户最新地址
+    post:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 手机号
+        in: body
+        name: phone
+        schema:
+          type: string
+      - description: 地址
+        in: body
+        name: address
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 创建地址
+  /api/v1/addresses/{id}:
+    get:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        schema:
+          type: string
+      - description: 手机号
+        in: body
+        name: phone
+        schema:
+          type: string
+      - description: 地址
+        in: body
+        name: address
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 展示用户所有收货地址
+  /api/v1/carousels:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 显示轮播图
+  /api/v1/ping:
+    get:
+      parameters:
+      - description: Token
+        in: body
+        name: Token
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+      summary: 验证Token
+  /api/v1/user:
+    put:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 昵称
+        in: body
+        name: nick_name
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 用户更新信息
+  /api/v1/user/login:
+    post:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "10004":
+          description: 密码不正确
+          schema:
+            type: string
+        "10010":
+          description: 用户不存在
+          schema:
+            type: string
+        "30003":
+          description: Token初始化失败
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 用户登陆
+  /api/v1/user/register:
+    post:
+      parameters:
+      - description: 用户名
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: 昵称
+        in: body
+        name: nick_name
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      - description: 密钥
+        in: body
+        name: key
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "500":
+          description: 密钥错误
+          schema:
+            type: string
+        "10002":
+          description: 用户已存在
+          schema:
+            type: string
+        "10006":
+          description: 密码加密失败
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 用户注册
+  /api/v1/user/sending-email:
+    post:
+      parameters:
+      - description: 操作类型
+        in: body
+        name: operationType
+        required: true
+        schema:
+          type: string
+      - description: 对方邮箱
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "10010":
+          description: 用户不存在
+          schema:
+            type: string
+        "30003":
+          description: 鉴权失败
+          schema:
+            type: string
+        "30007":
+          description: 发送邮件失败
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 发送邮件
+  /api/v1/user/valid-email:
+    post:
+      parameters:
+      - description: Token
+        in: body
+        name: Token
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "400":
+          description: 非法Token
+          schema:
+            type: string
+        "30001":
+          description: 管理员错误
+          schema:
+            type: string
+        "30002":
+          description: Token过期
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 解绑邮箱
+  /api/v2/admin/login:
+    post:
+      parameters:
+      - description: 用户名
+        in: body
+        name: user_name
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "10004":
+          description: 密码错误
+          schema:
+            type: string
+        "10010":
+          description: 用户不存在
+          schema:
+            type: string
+        "30003":
+          description: 鉴权失败
+          schema:
+            type: string
+      summary: 管理员登陆
+  /api/v2/admin/register:
+    post:
+      parameters:
+      - description: 用户名
+        in: body
+        name: user_name
+        required: true
+        schema:
+          type: string
+      - description: 密码
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "10002":
+          description: 用户已存在
+          schema:
+            type: string
+        "10006":
+          description: 密码加密失败
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 管理员注册
+  /api/v2/carousels:
+    post:
+      parameters:
+      - description: 轮播图保存路径
+        in: body
+        name: imgPath
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            type: string
+        "40001":
+          description: 数据库错误
+          schema:
+            type: string
+      summary: 创建轮播图
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

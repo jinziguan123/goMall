@@ -50,7 +50,7 @@ var (
 
 func Init() {
 	// 从本地读取环境变量
-	file, err := ini.Load("/Users/jinziguan/Desktop/gin-mall/conf/config.ini")
+	file, err := ini.Load("/Users/jinziguan/Desktop/goMall/backend/config/config.ini")
 	if err != nil {
 		fmt.Println("配置文件读取错误，请检查文件路径:", err)
 	}

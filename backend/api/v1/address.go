@@ -2,7 +2,7 @@
  * @Author: Ziguan Jin 18917950960@163.com
  * @Date: 2024-04-07 16:46:53
  * @LastEditors: Ziguan Jin 18917950960@163.com
- * @LastEditTime: 2024-04-10 11:49:19
+ * @LastEditTime: 2024-04-16 21:18:51
  * @FilePath: /goMall/backend/api/v1/address.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,7 +16,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 创建地址
+// @Summary 创建地址
+// @Produce json
+// @Param name body string true "用户名"
+// @Param phone body string false "手机号"
+// @Param address body string false "地址"
+// @Success 200 {object} string "成功"
+// @Failure 40001 {object} string "数据库错误"
+// @Router /api/v1/addresses [POST]
 func CreateAddress(c *gin.Context) {
 	addressService := service.AddressService{}
 	claim, _ := utils.ParseToken(c.GetHeader("Authorization"))
@@ -29,14 +36,28 @@ func CreateAddress(c *gin.Context) {
 	}
 }
 
-// 展示某个收货地址
+// @Summary 展示用户最新地址
+// @Produce json
+// @Param name body string false "用户名"
+// @Param phone body string false "手机号"
+// @Param address body string false "地址"
+// @Success 200 {object} string "成功"
+// @Failure 40001 {object} string "数据库错误"
+// @Router /api/v1/addresses [GET]
 func GetAddress(c *gin.Context) {
 	addressService := service.AddressService{}
 	res := addressService.Show(c.Request.Context(), c.Param("id"))
 	c.JSON(consts.StatusOK, res)
 }
 
-// 展示所有收货地址
+// @Summary 展示用户所有收货地址
+// @Produce json
+// @Param name body string false "用户名"
+// @Param phone body string false "手机号"
+// @Param address body string false "地址"
+// @Success 200 {object} string "成功"
+// @Failure 40001 {object} string "数据库错误"
+// @Router /api/v1/addresses/{id} [GET]
 func ListAddress(c *gin.Context) {
 	addressService := service.AddressService{}
 	claim, _ := utils.ParseToken(c.GetHeader("Authorization"))

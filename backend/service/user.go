@@ -33,6 +33,7 @@ type SendEmailService struct {
 }
 
 type ValidEmailService struct {
+	Token string `form:"token" json:"token"`
 }
 
 func (service UserService) Register(ctx context.Context) serializer.Response {
@@ -43,7 +44,7 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
-			Data:   "密钥长度不足",
+			Data:   "密钥错误",
 		}
 	}
 	utils.Encrypt.SetKey(service.Key)
@@ -113,7 +114,7 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-	if user.CheckPassword(service.Password) == false {
+	if !user.CheckPassword(service.Password) {
 		code = e.ErrorNotCompare
 		return serializer.Response{
 			Status: code,
@@ -276,7 +277,7 @@ func (service *SendEmailService) Send(ctx context.Context, id uint) serializer.R
 }
 
 // Valid 验证内容
-func (service ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
+func (service ValidEmailService) Valid(ctx context.Context) serializer.Response {
 	var userID uint
 	var email string
 	var password string
@@ -284,10 +285,10 @@ func (service ValidEmailService) Valid(ctx context.Context, token string) serial
 	code := e.SUCCESS
 
 	// 验证token
-	if token == "" {
+	if service.Token == "" {
 		code = e.InvalidParams
 	} else {
-		claims, err := utils.ParseEmailToken(token)
+		claims, err := utils.ParseEmailToken(service.Token)
 		if err != nil {
 			logging.Info(err)
 			code = e.ErrorAuthCheckTokenFail
